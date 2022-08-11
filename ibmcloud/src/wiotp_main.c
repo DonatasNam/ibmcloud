@@ -69,7 +69,10 @@ int main(int argc, char* argv[]){
     }
 
     rc =wiotp_init(&config,&device,&arguments.orgid,&arguments.typeid,&arguments.deviceid,&arguments.auth);
-
+    if (rc != IOTPRC_SUCCESS){
+        syslog(LOG_ERR,"Failed to initialize iotp device, err: %d", rc);
+        goto program_exit;
+    }
 
     while(!stop){
 

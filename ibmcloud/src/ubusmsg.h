@@ -20,7 +20,7 @@ enum {
 };
 
 enum ubusmsg_err{
-	UBUSMSG_SUCCESS =200,
+	UBUSMSG_SUCCESS =0,
 	UBUSMSG_ERR= 201
 };
 
