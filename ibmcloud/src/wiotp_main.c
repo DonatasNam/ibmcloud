@@ -40,6 +40,23 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
+int ibmcloud_loop(struct ubus_context *ctx, struct data *response,IoTPDevice*device,char *deviceId, long total,long free){
+    int rc =0;
+    rc =get_ubusmsg(ctx,response);
+        if (rc!=UBUSMSG_SUCCESS){
+            syslog(LOG_ERR,"Failed getting information from uBus, err: %d", rc);
+            return rc;
+        }
+    rc =send_data(device,deviceId,total,free);
+            if (rc!=IOTPRC_SUCCESS){
+            syslog(LOG_ERR,"Failed to send data, err: %d", rc);
+            return rc;
+        }
+    response->free=0;
+    response->total=0;
+    sleep(10);
+    return rc;
+}
 
 int main(int argc, char* argv[]){
 
@@ -48,8 +65,6 @@ int main(int argc, char* argv[]){
     struct data response = {0, 0};
     struct ubus_context *ctx;
     struct arguments arguments = {NULL, 0,0,0,0,0};
-
-
     int rc = 0;
 
     openlog("ibmcloud",LOG_PID, LOG_USER);
@@ -76,18 +91,13 @@ int main(int argc, char* argv[]){
 
     while(!stop){
 
-        rc =get_ubusmsg(ctx,&response);
-        if (rc!=UBUSMSG_SUCCESS){
-            syslog(LOG_ERR,"Failed getting information from uBus, err: %d", rc);
+
+        rc = ibmcloud_loop(ctx,&response,device,arguments.deviceid, response.total,response.free);
+        if (rc != IOTPRC_SUCCESS){
             goto disconect_device;
         }
-        rc =send_data(device,arguments.deviceid,response.total,response.free);
-            if (rc!=IOTPRC_SUCCESS){
-            syslog(LOG_ERR,"Failed to send data, err: %d", rc);
-            goto disconect_device;
-        }
-        struct data response = {0, 0};
-        sleep(10);
+        
+        
     }
 
     disconect_device:

@@ -36,3 +36,4 @@ struct arguments{
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state);
 static struct argp argp = {options, parse_opt, arg_doc};
+int ibmcloud_loop(struct ubus_context *ctx, struct data *response,IoTPDevice*device,char *deviceId, long total,long free);
